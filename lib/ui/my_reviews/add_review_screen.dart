@@ -24,18 +24,9 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
   final TextEditingController _commentController = TextEditingController();
 
   double _rating = 4;
-  String _visitType = 'Dinner';
-  DateTime _visitDate = DateTime.now();
 
   bool _isSaving = false;
   String? _errorMessage;
-
-  static const List<String> _visitTypes = [
-    'Breakfast',
-    'Lunch',
-    'Dinner',
-    'Takeaway',
-  ];
 
   bool get _isEditing => widget.existingReview != null;
 
@@ -46,9 +37,6 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
     if (existing != null) {
       _commentController.text = existing.comment;
       _rating = existing.rating;
-      if (_visitTypes.contains(existing.visitType)) {
-        _visitType = existing.visitType;
-      }
     }
   }
 
@@ -56,38 +44,6 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
   void dispose() {
     _commentController.dispose();
     super.dispose();
-  }
-
-  String _formatDate(DateTime date) {
-    const List<String> months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
-  }
-
-  Future<void> _pickDate() async {
-    final DateTime now = DateTime.now();
-    final DateTime? chosen = await showDatePicker(
-      context: context,
-      initialDate: _visitDate,
-      firstDate: DateTime(now.year - 1, now.month, now.day),
-      lastDate: now,
-    );
-
-    if (chosen != null) {
-      setState(() => _visitDate = chosen);
-    }
   }
 
   Future<void> _save() async {
@@ -112,8 +68,6 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
         authorName: authorName,
         rating: _rating,
         comment: _commentController.text.trim(),
-        visitType: _visitType,
-        visitDate: _formatDate(_visitDate),
       );
 
       if (_isEditing) {
@@ -217,40 +171,6 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    DropdownButtonFormField<String>(
-                      initialValue: _visitType,
-                      decoration: const InputDecoration(
-                        labelText: 'Which meal?',
-                        prefixIcon: Icon(Icons.restaurant_menu),
-                        border: OutlineInputBorder(),
-                      ),
-                      items: _visitTypes.map((String type) {
-                        return DropdownMenuItem<String>(
-                          value: type,
-                          child: Text(type),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) {
-                        if (value != null) {
-                          setState(() => _visitType = value);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    InkWell(
-                      onTap: _pickDate,
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'When did you visit?',
-                          prefixIcon: Icon(Icons.calendar_today_outlined),
-                          border: OutlineInputBorder(),
-                        ),
-                        child: Text(_formatDate(_visitDate)),
-                      ),
                     ),
                     const SizedBox(height: 16),
 

@@ -1,106 +1,68 @@
-import 'dart:async';
+import 'package:firebase_database/firebase_database.dart';
 
 import '../models/restaurant.dart';
 import '../models/review.dart';
 
-/// In-memory, non-persisted replacement for the old Firebase Realtime
-/// Database-backed DatabaseService. No real backend: data only lives for the
-/// current app session and resets on restart.
 class DatabaseService {
   DatabaseService._();
 
-  static final List<Restaurant> _restaurants = <Restaurant>[];
-  static final List<Review> _reviews = <Review>[];
+  static final DatabaseReference _restaurantsRef = FirebaseDatabase.instance
+      .ref('restaurants');
+  static final DatabaseReference _reviewsRef = FirebaseDatabase.instance.ref(
+    'reviews',
+  );
 
-  static final StreamController<List<Restaurant>> _restaurantsController =
-      StreamController<List<Restaurant>>.broadcast();
-  static final StreamController<List<Review>> _reviewsController =
-      StreamController<List<Review>>.broadcast();
+  static List<Restaurant> _toRestaurantList(DatabaseEvent event) {
+    final Map<dynamic, dynamic>? data =
+        event.snapshot.value as Map<dynamic, dynamic>?;
+    if (data == null) return [];
 
-  static int _nextRestaurantId = 1;
-  static int _nextReviewId = 1;
-
-  static List<Restaurant> _sortedRestaurants() {
-    final List<Restaurant> copy = List<Restaurant>.from(_restaurants);
-    copy.sort((a, b) => a.name.compareTo(b.name));
-    return copy;
+    final List<Restaurant> restaurants = data.entries
+        .map((entry) => Restaurant.fromMap(entry.key.toString(), entry.value))
+        .toList();
+    restaurants.sort((a, b) => a.name.compareTo(b.name));
+    return restaurants;
   }
 
-  static void _emitRestaurants() {
-    _restaurantsController.add(_sortedRestaurants());
+  static List<Review> _toReviewList(DatabaseEvent event) {
+    final Map<dynamic, dynamic>? data =
+        event.snapshot.value as Map<dynamic, dynamic>?;
+    if (data == null) return [];
+
+    return data.entries
+        .map((entry) => Review.fromMap(entry.key.toString(), entry.value))
+        .toList();
   }
 
-  static void _emitReviews() {
-    _reviewsController.add(List<Review>.from(_reviews));
+  static Stream<List<Restaurant>> restaurantsStream() {
+    return _restaurantsRef.onValue.map(_toRestaurantList);
   }
 
-  static Stream<List<Restaurant>> restaurantsStream() async* {
-    yield _sortedRestaurants();
-    yield* _restaurantsController.stream;
-  }
-
-  static Stream<List<Review>> reviewsStream() async* {
-    yield List<Review>.from(_reviews);
-    yield* _reviewsController.stream;
+  static Stream<List<Review>> reviewsStream() {
+    return _reviewsRef.onValue.map(_toReviewList);
   }
 
   static Future<void> addReview(Review review) async {
-    final Review stored = Review(
-      id: 'local-review-${_nextReviewId++}',
-      restaurantId: review.restaurantId,
-      userId: review.userId,
-      authorName: review.authorName,
-      rating: review.rating,
-      comment: review.comment,
-      visitType: review.visitType,
-      visitDate: review.visitDate,
-    );
-    _reviews.add(stored);
-    _emitReviews();
+    await _reviewsRef.push().set(review.toMap());
   }
 
   static Future<void> updateReview(Review review) async {
-    final int index = _reviews.indexWhere((r) => r.id == review.id);
-    if (index != -1) {
-      _reviews[index] = review;
-      _emitReviews();
-    }
+    await _reviewsRef.child(review.id).update(review.toMap());
   }
 
   static Future<void> deleteReview(String reviewId) async {
-    _reviews.removeWhere((r) => r.id == reviewId);
-    _emitReviews();
+    await _reviewsRef.child(reviewId).remove();
   }
 
   static Future<void> addRestaurant(Restaurant restaurant) async {
-    final Restaurant stored = Restaurant(
-      id: 'local-restaurant-${_nextRestaurantId++}',
-      ownerId: restaurant.ownerId,
-      name: restaurant.name,
-      cuisine: restaurant.cuisine,
-      area: restaurant.area,
-      rating: restaurant.rating,
-      priceRange: restaurant.priceRange,
-      imageUrl: restaurant.imageUrl,
-      description: restaurant.description,
-      popularDishes: restaurant.popularDishes,
-      latitude: restaurant.latitude,
-      longitude: restaurant.longitude,
-    );
-    _restaurants.add(stored);
-    _emitRestaurants();
+    await _restaurantsRef.push().set(restaurant.toMap());
   }
 
   static Future<void> updateRestaurant(Restaurant restaurant) async {
-    final int index = _restaurants.indexWhere((r) => r.id == restaurant.id);
-    if (index != -1) {
-      _restaurants[index] = restaurant;
-      _emitRestaurants();
-    }
+    await _restaurantsRef.child(restaurant.id).update(restaurant.toMap());
   }
 
   static Future<void> deleteRestaurant(String restaurantId) async {
-    _restaurants.removeWhere((r) => r.id == restaurantId);
-    _emitRestaurants();
+    await _restaurantsRef.child(restaurantId).remove();
   }
 }

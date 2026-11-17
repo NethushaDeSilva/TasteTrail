@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'firebase_options.dart';
 import 'models/app_user.dart';
 import 'ui/auth/login_screen.dart';
 import 'ui/main_screen.dart';
@@ -8,6 +10,7 @@ import 'ui/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const RestaurantReviewApp());
 }
 
@@ -17,7 +20,7 @@ class RestaurantReviewApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Colombo Eats',
+      title: 'Taste Trail',
       debugShowCheckedModeBanner: false,
 
       theme: lightTheme,

@@ -113,7 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Join Colombo Eats', style: text.headlineSmall),
+                    Text('Join Taste Trail', style: text.headlineSmall),
                     const SizedBox(height: 4),
                     Text(
                       'Your name appears on the reviews you write',

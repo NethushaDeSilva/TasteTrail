@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-const Color kSeedColour = Color(0xFFBF360C); // deep orange
+const Color kSeedColour = Color(0xFF00695C); // teal
 
 final ThemeData lightTheme = ThemeData(
   useMaterial3: true,
@@ -8,6 +9,7 @@ final ThemeData lightTheme = ThemeData(
     seedColor: kSeedColour,
     brightness: Brightness.light,
   ),
+  textTheme: GoogleFonts.poppinsTextTheme(),
 );
 
 final ThemeData darkTheme = ThemeData(
@@ -16,4 +18,5 @@ final ThemeData darkTheme = ThemeData(
     seedColor: kSeedColour,
     brightness: Brightness.dark,
   ),
+  textTheme: GoogleFonts.poppinsTextTheme(ThemeData(brightness: Brightness.dark).textTheme),
 );

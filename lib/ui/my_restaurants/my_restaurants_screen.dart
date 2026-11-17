@@ -174,7 +174,7 @@ class MyRestaurantsScreen extends StatelessWidget {
                 );
               }
 
-              final Map<String, ({double average, int count})> ratings =
+              final Map<String, RestaurantRating> ratings =
                   ratingsByRestaurant(reviewSnapshot.data ?? []);
 
               return ListView.builder(
@@ -182,8 +182,7 @@ class MyRestaurantsScreen extends StatelessWidget {
                 itemCount: mine.length,
                 itemBuilder: (BuildContext context, int index) {
                   final Restaurant restaurant = mine[index];
-                  final ({double average, int count})? stats =
-                      ratings[restaurant.id];
+                  final RestaurantRating? stats = ratings[restaurant.id];
 
                   return Card(
                     clipBehavior: Clip.antiAlias,

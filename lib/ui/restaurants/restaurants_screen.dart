@@ -17,7 +17,6 @@ class RestaurantsScreen extends StatefulWidget {
 class _RestaurantsScreenState extends State<RestaurantsScreen> {
   double _minRating = 0;
   bool _showFilter = false;
-  String _searchName = '';
 
   void _openDetail(Restaurant restaurant) {
     Navigator.push(
@@ -30,15 +29,12 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
 
   List<Restaurant> _applyFilters(
     List<Restaurant> all,
-    Map<String, ({double average, int count})> ratings,
+    Map<String, RestaurantRating> ratings,
   ) {
-    final List<Restaurant> matches = all.where((restaurant) {
+    return all.where((restaurant) {
       final double average = ratings[restaurant.id]?.average ?? 0;
-      return average >= _minRating &&
-          (_searchName.isEmpty || restaurant.name.toLowerCase() == _searchName);
+      return average >= _minRating;
     }).toList();
-
-    return matches;
   }
 
   int _columnCount(Orientation orientation) {
@@ -127,7 +123,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
 
   Widget _buildList(
     List<Restaurant> visible,
-    Map<String, ({double average, int count})> ratings,
+    Map<String, RestaurantRating> ratings,
   ) {
     return OrientationBuilder(
       builder: (context, orientation) {
@@ -177,20 +173,6 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Restaurants'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(72),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: TextField(
-              decoration: const InputDecoration(
-                labelText: 'Search by restaurant name',
-                hintText: 'Enter the full name',
-              ),
-              onChanged: (value) =>
-                  setState(() => _searchName = value.trim().toLowerCase()),
-            ),
-          ),
-        ),
         actions: [
           IconButton(
             icon: Icon(_showFilter ? Icons.filter_list_off : Icons.filter_list),
@@ -240,7 +222,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                 );
               }
 
-              final Map<String, ({double average, int count})> ratings =
+              final Map<String, RestaurantRating> ratings =
                   ratingsByRestaurant(reviewSnapshot.data ?? []);
               final List<Restaurant> visible = _applyFilters(all, ratings);
 
@@ -252,9 +234,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                         ? _buildMessage(
                             Icons.search_off,
                             'No restaurants match',
-                            _searchName.isEmpty
-                                ? 'Lower the minimum rating to see more results.'
-                                : 'Check the full name or lower the minimum rating.',
+                            'Lower the minimum rating to see more results.',
                           )
                         : _buildList(visible, ratings),
                   ),

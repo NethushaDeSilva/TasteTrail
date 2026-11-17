@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../models/restaurant.dart';
 import '../../models/review.dart';
-import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../utils/ratings.dart';
 import '../widgets/restaurant_image.dart';
@@ -61,24 +60,6 @@ class RestaurantDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(review.comment, style: text.bodyMedium),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Chip(
-                  label: Text(review.visitType),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  labelStyle: text.labelSmall,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  review.visitDate,
-                  style: text.labelSmall?.copyWith(
-                    color: colours.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -110,8 +91,7 @@ class RestaurantDetailScreen extends StatelessWidget {
 
   Widget _buildDetails(
     BuildContext context,
-    bool isMyRestaurant,
-    ({double average, int count})? stats,
+    RestaurantRating? stats,
     List<Review> mine,
   ) {
     final TextTheme text = Theme.of(context).textTheme;
@@ -156,37 +136,6 @@ class RestaurantDetailScreen extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 14),
-
-        if (isMyRestaurant) ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colours.secondaryContainer,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.storefront_outlined,
-                  size: 20,
-                  color: colours.onSecondaryContainer,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'This is your restaurant. Owners cannot review their own '
-                    'listings.',
-                    style: text.bodySmall?.copyWith(
-                      color: colours.onSecondaryContainer,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-        ],
 
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,18 +188,13 @@ class RestaurantDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String myId = AuthService.currentUser?.uid ?? '';
-    final bool isMyRestaurant = restaurant.isOwnedBy(myId);
-
     return Scaffold(
       appBar: AppBar(title: Text(restaurant.name)),
-      floatingActionButton: isMyRestaurant
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: () => _writeReview(context),
-              icon: const Icon(Icons.edit_outlined),
-              label: const Text('Write a review'),
-            ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _writeReview(context),
+        icon: const Icon(Icons.edit_outlined),
+        label: const Text('Write a review'),
+      ),
 
       body: StreamBuilder<List<Review>>(
         stream: DatabaseService.reviewsStream(),
@@ -274,9 +218,8 @@ class RestaurantDetailScreen extends StatelessWidget {
           final List<Review> mine = (snapshot.data ?? <Review>[])
               .where((review) => review.restaurantId == restaurant.id)
               .toList();
-          final ({double average, int count})? stats = ratingsByRestaurant(
-            mine,
-          )[restaurant.id];
+          final RestaurantRating? stats =
+              ratingsByRestaurant(mine)[restaurant.id];
 
           return OrientationBuilder(
             builder: (context, orientation) {
@@ -298,7 +241,6 @@ class RestaurantDetailScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         child: _buildDetails(
                           context,
-                          isMyRestaurant,
                           stats,
                           mine,
                         ),
@@ -321,7 +263,6 @@ class RestaurantDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: _buildDetails(
                         context,
-                        isMyRestaurant,
                         stats,
                         mine,
                       ),

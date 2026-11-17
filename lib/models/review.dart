@@ -5,8 +5,6 @@ class Review {
   final String authorName;
   final double rating;
   final String comment;
-  final String visitType;
-  final String visitDate;
 
   Review({
     required this.id,
@@ -15,8 +13,6 @@ class Review {
     required this.authorName,
     required this.rating,
     required this.comment,
-    required this.visitType,
-    required this.visitDate,
   });
 
   factory Review.fromMap(String id, Map<dynamic, dynamic> map) {
@@ -27,8 +23,6 @@ class Review {
       authorName: map['authorName']?.toString() ?? 'Unknown',
       rating: double.tryParse(map['rating']?.toString() ?? '') ?? 0,
       comment: map['comment']?.toString() ?? '',
-      visitType: map['visitType']?.toString() ?? '',
-      visitDate: map['visitDate']?.toString() ?? '',
     );
   }
 
@@ -39,8 +33,6 @@ class Review {
       'authorName': authorName,
       'rating': rating,
       'comment': comment,
-      'visitType': visitType,
-      'visitDate': visitDate,
     };
   }
 }

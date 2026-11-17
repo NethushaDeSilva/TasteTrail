@@ -180,7 +180,7 @@ class ProfileScreen extends StatelessWidget {
                     const ListTile(
                       leading: Icon(Icons.info_outline),
                       title: Text('About'),
-                      subtitle: Text('Colombo Eats · version 1.0.0'),
+                      subtitle: Text('Taste Trail · version 1.0.0'),
                     ),
                     const Divider(height: 1),
                     ListTile(

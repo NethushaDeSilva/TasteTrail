@@ -89,8 +89,6 @@ void main() {
         authorName: 'Nethusha De Silva',
         rating: 4.5,
         comment: 'Booked the Half Kilo crab. Worth it once.',
-        visitType: 'Dinner',
-        visitDate: '12 Aug 2026',
       );
 
       final Review restored = Review.fromMap('v1', original.toMap());
@@ -101,8 +99,6 @@ void main() {
       expect(restored.authorName, original.authorName);
       expect(restored.rating, original.rating);
       expect(restored.comment, original.comment);
-      expect(restored.visitType, original.visitType);
-      expect(restored.visitDate, original.visitDate);
     });
 
     test('uses a placeholder when the author name is missing', () {
@@ -124,8 +120,6 @@ void main() {
         authorName: 'Reviewer',
         rating: rating,
         comment: 'Placeholder comment for the test review.',
-        visitType: 'Dinner',
-        visitDate: '1 Jan 2026',
       );
     }
 
@@ -134,7 +128,7 @@ void main() {
     });
 
     test('a single review sets the average to its own rating', () {
-      final Map<String, ({double average, int count})> ratings =
+      final Map<String, RestaurantRating> ratings =
           ratingsByRestaurant([review('r1', 4.0)]);
 
       expect(ratings['r1']?.average, 4.0);
@@ -142,7 +136,7 @@ void main() {
     });
 
     test('groups reviews by restaurant and averages each separately', () {
-      final Map<String, ({double average, int count})> ratings =
+      final Map<String, RestaurantRating> ratings =
           ratingsByRestaurant([
             review('r1', 5.0),
             review('r1', 3.0),
@@ -156,14 +150,14 @@ void main() {
     });
 
     test('a restaurant with no reviews has no entry in the map', () {
-      final Map<String, ({double average, int count})> ratings =
+      final Map<String, RestaurantRating> ratings =
           ratingsByRestaurant([review('r1', 4.0)]);
 
       expect(ratings.containsKey('r2'), false);
     });
 
     test('rounds the average to one decimal place', () {
-      final Map<String, ({double average, int count})> ratings =
+      final Map<String, RestaurantRating> ratings =
           ratingsByRestaurant([
             review('r1', 4.0),
             review('r1', 4.0),

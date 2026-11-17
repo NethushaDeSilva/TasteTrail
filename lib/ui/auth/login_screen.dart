@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Colombo Eats',
+                      'Taste Trail',
                       textAlign: TextAlign.center,
                       style: text.headlineMedium,
                     ),

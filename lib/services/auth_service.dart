@@ -1,84 +1,64 @@
-import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 import '../models/app_user.dart';
 
-/// Lightweight stand-in for FirebaseAuthException, kept so the UI layer can
-/// keep the same catch/message pattern it used with Firebase.
+/// Wraps FirebaseAuthException so the UI layer's catch/message pattern
+/// doesn't need to depend on the Firebase package directly.
 class AuthException implements Exception {
   final String code;
   AuthException(this.code);
 }
 
-class _Account {
-  final String password;
-  final AppUser user;
-
-  _Account({required this.password, required this.user});
-}
-
-/// In-memory, non-persisted replacement for the old Firebase-backed
-/// AuthService. No real backend: accounts and the signed-in user only live
-/// for the current app session.
 class AuthService {
   AuthService._();
 
-  static final Map<String, _Account> _accounts = <String, _Account>{};
-  static final StreamController<AppUser?> _controller =
-      StreamController<AppUser?>.broadcast();
-  static AppUser? _currentUser;
-  static int _nextId = 1;
+  static final fb.FirebaseAuth _auth = fb.FirebaseAuth.instance;
 
-  static Stream<AppUser?> authChanges() async* {
-    yield _currentUser;
-    yield* _controller.stream;
+  static AppUser? _toAppUser(fb.User? user) {
+    if (user == null) return null;
+    return AppUser(
+      uid: user.uid,
+      email: user.email ?? '',
+      displayName: user.displayName ?? '',
+    );
   }
 
-  static AppUser? get currentUser => _currentUser;
+  static Stream<AppUser?> authChanges() {
+    return _auth.authStateChanges().map(_toAppUser);
+  }
+
+  static AppUser? get currentUser => _toAppUser(_auth.currentUser);
 
   static Future<void> register(
     String name,
     String email,
     String password,
   ) async {
-    final String key = email.trim().toLowerCase();
-
-    if (_accounts.containsKey(key)) {
-      throw AuthException('email-already-in-use');
+    try {
+      final fb.UserCredential credential = await _auth
+          .createUserWithEmailAndPassword(
+            email: email.trim(),
+            password: password,
+          );
+      await credential.user?.updateDisplayName(name.trim());
+    } on fb.FirebaseAuthException catch (error) {
+      throw AuthException(error.code);
     }
-    if (password.length < 6) {
-      throw AuthException('weak-password');
-    }
-
-    final AppUser user = AppUser(
-      uid: 'local-user-${_nextId++}',
-      email: email.trim(),
-      displayName: name.trim(),
-    );
-    _accounts[key] = _Account(password: password, user: user);
-
-    // Mirrors FirebaseAuth's behaviour of signing the new user in.
-    _currentUser = user;
-    _controller.add(_currentUser);
   }
 
   static Future<void> signIn(String email, String password) async {
-    final String key = email.trim().toLowerCase();
-    final _Account? account = _accounts[key];
-
-    if (account == null) {
-      throw AuthException('user-not-found');
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+    } on fb.FirebaseAuthException catch (error) {
+      throw AuthException(error.code);
     }
-    if (account.password != password) {
-      throw AuthException('wrong-password');
-    }
-
-    _currentUser = account.user;
-    _controller.add(_currentUser);
   }
 
   static Future<void> signOut() async {
-    _currentUser = null;
-    _controller.add(null);
+    await _auth.signOut();
   }
 
   static String messageFor(AuthException error) {
@@ -97,8 +77,11 @@ class AuthService {
         return 'No internet connection. Check your network and try again.';
       case 'too-many-requests':
         return 'Too many attempts. Wait a moment and try again.';
+      case 'operation-not-allowed':
+      case 'configuration-not-found':
+        return 'Email/password sign-in is not enabled for this project yet.';
       default:
-        return 'Something went wrong. Please try again.';
+        return 'Something went wrong (${error.code}). Please try again.';
     }
   }
 }

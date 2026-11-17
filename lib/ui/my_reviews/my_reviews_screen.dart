@@ -199,19 +199,6 @@ class MyReviewsScreen extends StatelessWidget {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              Chip(
-                                label: Text(review.visitType),
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
-                                labelStyle: text.labelSmall,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                review.visitDate,
-                                style: text.labelSmall?.copyWith(
-                                  color: colours.onSurfaceVariant,
-                                ),
-                              ),
                               const Spacer(),
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined),

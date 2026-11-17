@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "33071769572",
+    "firebase_url": "https://tastetrail-a3265-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "tastetrail-a3265",
+    "storage_bucket": "tastetrail-a3265.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33071769572:android:d4173ee2eb7b1232d649f1",
+        "android_client_info": {
+          "package_name": "com.example.restaurant_review_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjhdOhO1aKTU7R8VA9mQcaTEmGXVeXz2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

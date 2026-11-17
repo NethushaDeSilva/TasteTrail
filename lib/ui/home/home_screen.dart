@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
     final ColorScheme colours = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Colombo Eats')),
+      appBar: AppBar(title: const Text('Taste Trail')),
       body: StreamBuilder<List<Restaurant>>(
         stream: DatabaseService.restaurantsStream(),
         builder: (context, snapshot) {
@@ -98,13 +98,13 @@ class HomeScreen extends StatelessWidget {
                 );
               }
 
-              final Map<String, ({double average, int count})> ratings =
+              final Map<String, RestaurantRating> ratings =
                   ratingsByRestaurant(reviewSnapshot.data ?? []);
 
               final List<Restaurant> sorted = List.from(all);
               sorted.sort((a, b) {
-                final ({double average, int count})? ratingA = ratings[a.id];
-                final ({double average, int count})? ratingB = ratings[b.id];
+                final RestaurantRating? ratingA = ratings[a.id];
+                final RestaurantRating? ratingB = ratings[b.id];
                 if (ratingA == null && ratingB == null) {
                   return 0;
                 }

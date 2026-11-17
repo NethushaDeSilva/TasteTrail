@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class RestaurantImage extends StatelessWidget {
@@ -16,34 +17,27 @@ class RestaurantImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colours = Theme.of(context).colorScheme;
 
-    final Widget image = Image.network(
-      imageUrl,
+    final Widget image = CachedNetworkImage(
+      imageUrl: imageUrl,
       height: height,
       width: double.infinity,
       fit: BoxFit.cover,
 
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) {
-          return child;
-        }
-        return Container(
-          height: height,
-          color: colours.surfaceContainerHighest,
-          child: const Center(child: CircularProgressIndicator()),
-        );
-      },
+      placeholder: (context, url) => Container(
+        height: height,
+        color: colours.surfaceContainerHighest,
+        child: const Center(child: CircularProgressIndicator()),
+      ),
 
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          height: height,
-          color: colours.surfaceContainerHighest,
-          child: Icon(
-            Icons.restaurant,
-            size: 40,
-            color: colours.onSurfaceVariant,
-          ),
-        );
-      },
+      errorWidget: (context, url, error) => Container(
+        height: height,
+        color: colours.surfaceContainerHighest,
+        child: Icon(
+          Icons.restaurant,
+          size: 40,
+          color: colours.onSurfaceVariant,
+        ),
+      ),
     );
 
     if (heroTag == null) {
